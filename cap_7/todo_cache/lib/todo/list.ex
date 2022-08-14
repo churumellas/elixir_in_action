@@ -1,13 +1,11 @@
 defmodule Todo.List do
   # TODO: criar TodoEntry struct parar garantir que todas entries serão do mesmo tipo
-  defstruct auto_id: 1, entries: %{}
+  defstruct name: nil, auto_id: 1, entries: %{}
 
-  def new, do: %Todo.List{}
-
-  def new(entries) do
+  def new(server_name, entries \\ []) do
     Enum.reduce(
       entries,
-      %Todo.List{},
+      %Todo.List{name: server_name},
       fn entry, todo_list ->
         add_entry(todo_list, entry)
       end
@@ -62,6 +60,6 @@ defmodule Todo.List do
     |> Stream.map(&String.replace(&1, "/", "-"))
     |> Stream.map(&String.split(&1, ","))
     |> Stream.map(fn [date, title] -> %{date: Date.from_iso8601!(date), title: title} end)
-    |> new()
+    |> then(&new(file_path, &1))
   end
 end

@@ -11,6 +11,7 @@ defmodule Todo.Cache do
   end
 
   def init(_) do
+    Todo.Database.start()
     {:ok, %{}}
   end
 
@@ -20,7 +21,7 @@ defmodule Todo.Cache do
         {:reply, server_pid, todo_server_pool}
 
       :error ->
-        {:ok, new_server} = Server.start()
+        {:ok, new_server} = Server.start(todo_server_name)
         {:reply, new_server, Map.put(todo_server_pool, todo_server_name, new_server)}
     end
   end
