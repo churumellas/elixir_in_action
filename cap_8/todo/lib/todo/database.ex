@@ -5,9 +5,9 @@ defmodule Todo.Database do
 
   @db_foler "./persist"
 
-  def start do
+  def start_link(_) do
     Logger.debug("Iniciando processo Database.")
-    GenServer.start(__MODULE__, nil, name: __MODULE__)
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   def save(key, data) do
@@ -24,7 +24,7 @@ defmodule Todo.Database do
 
     workers =
       0..2
-      |> Enum.map(fn _ -> GenServer.start(DatabaseWorker, @db_foler) end)
+      |> Enum.map(fn _ -> GenServer.start_link(DatabaseWorker, @db_foler) end)
       |> Enum.map(fn {:ok, pid} -> pid end)
       |> Enum.with_index()
       |> Enum.map(fn {k, v} -> {v, k} end)

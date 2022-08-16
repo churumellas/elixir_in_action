@@ -4,7 +4,7 @@ defmodule Todo.Server do
   require Logger
 
   def start(server_name) do
-    GenServer.start(__MODULE__, server_name)
+    GenServer.start_link(__MODULE__, server_name)
   end
 
   def add_entry(server_pid, entry) do

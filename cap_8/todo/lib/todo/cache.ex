@@ -14,7 +14,6 @@ defmodule Todo.Cache do
   end
 
   def init(_) do
-    Todo.Database.start()
     {:ok, %{}}
   end
 
