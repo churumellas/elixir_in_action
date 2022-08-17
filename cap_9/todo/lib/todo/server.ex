@@ -1,10 +1,11 @@
 defmodule Todo.Server do
-  alias Todo.List, as: TodoList
-  use GenServer
+  use GenServer, restart: :temporary
   require Logger
 
-  def start(server_name) do
-    GenServer.start_link(__MODULE__, server_name)
+  alias Todo.List, as: TodoList
+
+  def start_link(server_name) do
+    GenServer.start_link(__MODULE__, server_name, name: via_tuple(server_name))
   end
 
   def add_entry(server_pid, entry) do
@@ -17,6 +18,10 @@ defmodule Todo.Server do
 
   def list_entries(server_pid, date) do
     GenServer.call(server_pid, {:list, date})
+  end
+
+  defp via_tuple(server_name) do
+    Todo.ProcessRegistry.via_tuple({__MODULE__, server_name})
   end
 
   # GenServer callback implementations

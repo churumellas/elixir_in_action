@@ -1,30 +1,32 @@
 defmodule Todo.Cache do
-  use GenServer
   require Logger
 
   alias Todo.Server
 
-  def start_link(_) do
+  def start_link do
     Logger.debug("Iniciando processo Cache")
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+    DynamicSupervisor.start_link(name: __MODULE__, strategy: :one_for_one)
+  end
+
+  def child_spec(_) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      type: :supervisor
+    }
   end
 
   def server_process(todo_server_name) do
-    GenServer.call(__MODULE__, {:server_process, todo_server_name})
-  end
-
-  def init(_) do
-    {:ok, %{}}
-  end
-
-  def handle_call({:server_process, todo_server_name}, _caller, todo_server_pool) do
-    case Map.fetch(todo_server_pool, todo_server_name) do
-      {:ok, server_pid} ->
-        {:reply, server_pid, todo_server_pool}
-
-      :error ->
-        {:ok, new_server} = Server.start(todo_server_name)
-        {:reply, new_server, Map.put(todo_server_pool, todo_server_name, new_server)}
+    case start_child(todo_server_name) do
+      {:ok, server_pid} -> server_pid
+      {:error, {:already_started, server_pid}} -> server_pid
     end
+  end
+
+  defp start_child(server_name) do
+    DynamicSupervisor.start_child(
+      __MODULE__,
+      {Server, server_name}
+    )
   end
 end
