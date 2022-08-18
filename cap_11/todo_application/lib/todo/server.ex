@@ -1,5 +1,5 @@
 defmodule Todo.Server do
-  @ttl :timer.minutes(5)
+  @ttl :timer.minutes(2)
 
   use GenServer, restart: :temporary
   require Logger

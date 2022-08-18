@@ -2,22 +2,18 @@ defmodule Todo.DatabaseWorker do
   use GenServer
   require Logger
 
-  def start_link({database_folder, worker_id}) do
-    Logger.debug("Iniciando DatabaseWorker #{worker_id}.")
+  def start_link(database_folder) do
+    Logger.debug("Iniciando DatabaseWorker.")
 
-    GenServer.start_link(
-      __MODULE__,
-      database_folder,
-      name: via_tuple(worker_id)
-    )
+    GenServer.start_link(__MODULE__, database_folder)
   end
 
   def store(worker_pid, key, data) do
-    GenServer.cast(via_tuple(worker_pid), {:store, key, data})
+    GenServer.cast(worker_pid, {:store, key, data})
   end
 
   def get(worker_pid, key) do
-    GenServer.call(via_tuple(worker_pid), {:get, key})
+    GenServer.call(worker_pid, {:get, key})
   end
 
   @impl GenServer
@@ -49,8 +45,4 @@ defmodule Todo.DatabaseWorker do
 
   defp bump_data_term({:ok, content}), do: :erlang.binary_to_term(content)
   defp bump_data_term(_), do: nil
-
-  defp via_tuple(worker_id) do
-    Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
-  end
 end
